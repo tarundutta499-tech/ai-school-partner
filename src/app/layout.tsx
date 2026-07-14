@@ -11,7 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "School Learning Partner AI - Your Personal Curriculum Teacher",
+  title: "Pathshala AI - Your Personal Curriculum Teacher",
   description: "AI tutor following class 6-12 school curriculums with simple translations, quizzes, notes & parents/teachers tracking dashboards.",
 };
 

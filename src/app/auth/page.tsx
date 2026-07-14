@@ -65,7 +65,7 @@ export default function AuthPage() {
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-primary to-secondary flex items-center justify-center shadow-md mx-auto">
             <Sparkles className="w-6 h-6 text-white" />
           </div>
-          <h2 className="text-xl font-black">Welcome to Partner AI</h2>
+          <h2 className="text-xl font-black">Welcome to Pathshala AI</h2>
           <p className="text-xs text-muted-foreground">Sign in to sync with your school curriculum</p>
         </div>
 

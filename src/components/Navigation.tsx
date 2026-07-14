@@ -31,7 +31,7 @@ export default function Navigation() {
             <Sparkles className="w-5 h-5 text-white" />
           </div>
           <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Partner AI
+            Pathshala AI
           </span>
         </Link>
 

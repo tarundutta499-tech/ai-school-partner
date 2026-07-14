@@ -141,7 +141,7 @@ export default function LandingPage() {
       {/* How It Works */}
       <section className="bg-muted/40 py-20 border-t border-b border-card-border/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-extrabold text-center mb-16">How Partner AI Integrates With Your School</h2>
+          <h2 className="text-3xl font-extrabold text-center mb-16">How Pathshala AI Integrates With Your School</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
             <div className="text-center relative">
@@ -305,7 +305,7 @@ export default function LandingPage() {
           <div className="p-6 bg-card border border-card-border rounded-2xl relative">
             <MessageCircle className="w-8 h-8 text-primary/10 absolute top-4 right-4" />
             <p className="text-xs text-muted-foreground italic mb-4 leading-relaxed">
-              &quot;Partner AI has changed our study hours at home. Ethan used to struggle with class 10 chemistry terms, but now he translates them to Hindi, gets a simple explanation, and passes his school quizzes easily.&quot;
+              &quot;Pathshala AI has changed our study hours at home. Ethan used to struggle with class 10 chemistry terms, but now he translates them to Hindi, gets a simple explanation, and passes his school quizzes easily.&quot;
             </p>
             <span className="text-xs font-bold">— Sarah S., Parent</span>
           </div>
@@ -380,7 +380,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-card-border/60 py-8 text-center text-xs text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} Partner AI Inc. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Pathshala AI Inc. All rights reserved.</p>
       </footer>
     </div>
   );
