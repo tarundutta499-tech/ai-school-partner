@@ -193,10 +193,9 @@ export default function StudentDashboard() {
   // Explanation settings state
   const [explanationMode, setExplanationMode] = useState<"standard" | "detailed" | "story" | "eli10" | "cartoon" | "cricket" | "realLife">("standard");
 
-  // Voice simulation
-  const [isPlayingVoice, setIsPlayingVoice] = useState(false);
-  const [voiceProgress, setVoiceProgress] = useState(0);
-  const [voiceIntervalId, setVoiceIntervalId] = useState<NodeJS.Timeout | null>(null);
+  // Azure Speech TTS States
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
 
   // Flashcards state
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -231,23 +230,44 @@ export default function StudentDashboard() {
   // Revision Mode States
   const [countdownDays, setCountdownDays] = useState<30 | 15 | 7 | 3 | 1>(7);
 
-  const startVoiceSimulation = () => {
-    if (isPlayingVoice) {
-      if (voiceIntervalId) clearInterval(voiceIntervalId);
-      setIsPlayingVoice(false);
-    } else {
-      setIsPlayingVoice(true);
-      const interval = setInterval(() => {
-        setVoiceProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(interval);
-            setIsPlayingVoice(false);
-            return 0;
-          }
-          return prev + 10;
-        });
-      }, 400);
-      setVoiceIntervalId(interval);
+  const startVoiceReal = async (textToSpeak: string) => {
+    if (isPlayingAudio) {
+      if (audioElement) {
+        audioElement.pause();
+        audioElement.currentTime = 0;
+      }
+      setIsPlayingAudio(false);
+      return;
+    }
+
+    try {
+      setIsPlayingAudio(true);
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: textToSpeak, language: preferredLanguage }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Azure API call failed" }));
+        alert(err.error || "Failed to generate speech narration.");
+        setIsPlayingAudio(false);
+        return;
+      }
+
+      const audioBlob = await res.blob();
+      const url = URL.createObjectURL(audioBlob);
+      const audio = new Audio(url);
+      setAudioElement(audio);
+      audio.play();
+      audio.onended = () => {
+        setIsPlayingAudio(false);
+        URL.revokeObjectURL(url);
+      };
+    } catch (error) {
+      console.error(error);
+      setIsPlayingAudio(false);
+      alert("Error playing voice narration. Verify your Azure key is active.");
     }
   };
 
@@ -269,8 +289,11 @@ export default function StudentDashboard() {
       "Water": "",
       "Chlorophyll": ""
     });
-    setIsPlayingVoice(false);
-    setVoiceProgress(0);
+    if (audioElement) {
+      audioElement.pause();
+      audioElement.currentTime = 0;
+    }
+    setIsPlayingAudio(false);
   };
 
   const handleAskDoubt = (e: React.FormEvent) => {
@@ -598,6 +621,20 @@ export default function StudentDashboard() {
                         <button onClick={() => setExplanationMode("cartoon")} className={`px-2 py-1 rounded-md text-[9px] font-bold ${explanationMode === "cartoon" ? "bg-primary text-white" : "bg-card border border-card-border"}`}>Explain Using Cartoon</button>
                         <button onClick={() => setExplanationMode("cricket")} className={`px-2 py-1 rounded-md text-[9px] font-bold ${explanationMode === "cricket" ? "bg-primary text-white" : "bg-card border border-card-border"}`}>Explain Using Cricket</button>
                         <button onClick={() => setExplanationMode("realLife")} className={`px-2 py-1 rounded-md text-[9px] font-bold ${explanationMode === "realLife" ? "bg-primary text-white" : "bg-card border border-card-border"}`}>Real-Life Examples</button>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 p-2 bg-primary/5 border border-primary/20 rounded-xl">
+                        <span className="text-[10px] font-bold text-primary uppercase">Read Explanations Voice Tutor:</span>
+                        <button
+                          onClick={() => startVoiceReal(getExplanationText())}
+                          className={`px-3 py-1 rounded-lg text-[9px] font-bold cursor-pointer transition-all flex items-center gap-1.5 ${
+                            isPlayingAudio 
+                              ? "bg-rose-500 text-white animate-pulse" 
+                              : "bg-primary text-white hover:brightness-110"
+                          }`}
+                        >
+                          🔊 {isPlayingAudio ? "Stop Audio" : "Read Aloud (Azure Speech)"}
+                        </button>
                       </div>
 
                       <div className="p-4 rounded-2xl bg-muted/80 border border-card-border/80 text-xs leading-relaxed min-h-[160px]">
