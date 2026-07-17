@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useApp } from "@/context/AppContext";
 import { 
   Sparkles, 
@@ -1036,6 +1037,13 @@ export default function StudentDashboard() {
                           >
                             📷 Scan Notebook (AI OCR)
                           </button>
+
+                          <Link
+                            href="/demo"
+                            className="px-3 py-1 bg-indigo-600 hover:brightness-110 text-white rounded-lg text-[9px] font-bold cursor-pointer transition-all flex items-center gap-1.5"
+                          >
+                            🎙️ AI Voice Lab
+                          </Link>
                         </div>
                       </div>
 

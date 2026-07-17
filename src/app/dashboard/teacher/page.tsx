@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useApp } from "@/context/AppContext";
 import { 
   Award, 
@@ -146,6 +147,12 @@ export default function TeacherDashboard() {
           >
             Generate Lesson Plan
           </button>
+          <Link 
+            href="/demo"
+            className="px-3 py-1.5 rounded-xl border border-secondary text-secondary bg-secondary/5 hover:bg-secondary/10 hover:text-secondary-foreground transition-all cursor-pointer flex items-center gap-1 font-bold"
+          >
+            🎙️ AI Voice Lab
+          </Link>
         </div>
       </div>
 

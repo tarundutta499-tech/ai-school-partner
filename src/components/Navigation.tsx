@@ -172,6 +172,13 @@ export default function Navigation() {
             )}
           </div>
 
+          <Link
+            href="/demo"
+            className="px-3 py-2 rounded-xl text-xs font-bold border border-secondary/40 text-secondary bg-secondary/5 hover:bg-secondary/10 hover:text-secondary-foreground transition-all cursor-pointer flex items-center gap-1"
+          >
+            🎙️ Try AI Voice (Demo)
+          </Link>
+
           {isLoggedIn ? (
             <div className="flex items-center gap-2">
               <Link
