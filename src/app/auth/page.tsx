@@ -15,7 +15,7 @@ import {
 
 export default function AuthPage() {
   const router = useRouter();
-  const { setRole } = useApp();
+  const { setRole, setIsLoggedIn } = useApp();
   const [authMethod, setAuthMethod] = useState<"email" | "otp" | "invite">("email");
 
   // Input states
@@ -30,6 +30,8 @@ export default function AuthPage() {
     const normalizedEmail = email.trim().toLowerCase();
     const normalizedPassword = password.trim();
     
+    setIsLoggedIn(true);
+
     if (normalizedEmail === "admin@school.edu" && normalizedPassword === "admin123") {
       setRole("admin");
       router.push("/onboard/school");
@@ -50,6 +52,7 @@ export default function AuthPage() {
 
   const handleGoogleLogin = () => {
     // Simulated Google Firebase popup
+    setIsLoggedIn(true);
     setRole("student");
     router.push("/student/profile");
   };

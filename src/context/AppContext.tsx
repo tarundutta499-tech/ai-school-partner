@@ -65,6 +65,10 @@ interface AppContextType {
   setActiveClassFocus: (focus: string) => void;
   activeHomeworkPrompt: string;
   setActiveHomeworkPrompt: (prompt: string) => void;
+
+  // Session State
+  isLoggedIn: boolean;
+  setIsLoggedIn: (val: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -100,6 +104,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [activeHomeworkPrompt, setActiveHomeworkPrompt] = useState(
     "Draw and label the chloroplast, then write a 200-word summary explaining photolysis of water in photosynthesis."
   );
+
+  // Session state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const addXp = (amount: number) => setXpPoints((prev) => prev + amount);
   const addCoins = (amount: number) => setCoinsCount((prev) => prev + amount);
@@ -189,7 +196,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         activeClassFocus,
         setActiveClassFocus,
         activeHomeworkPrompt,
-        setActiveHomeworkPrompt
+        setActiveHomeworkPrompt,
+        isLoggedIn,
+        setIsLoggedIn
       }}
     >
       {children}

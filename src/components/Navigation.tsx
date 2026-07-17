@@ -7,7 +7,8 @@ import { useApp, Role } from "@/context/AppContext";
 import { Sun, Moon, Sparkles, GraduationCap, Users, ShieldAlert, ShieldCheck, Award, School, Bell } from "lucide-react";
 
 export default function Navigation() {
-  const { role, setRole, theme, toggleTheme, preferredLanguage, currency, setCurrency } = useApp();
+  const { role, setRole, theme, toggleTheme, preferredLanguage, currency, setCurrency, isLoggedIn, setIsLoggedIn } = useApp();
+  const currentRole = role;
   const pathname = usePathname();
   const router = useRouter();
   const [showNotifications, setShowNotifications] = useState(false);
@@ -35,75 +36,77 @@ export default function Navigation() {
           </span>
         </Link>
 
-        {/* Dynamic Navigation Roles (Linear style tabs) */}
-        <nav className="hidden md:flex bg-muted/60 p-1 rounded-full border border-card-border/80">
-          <button
-            onClick={() => handleRoleChange("student")}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-              role === "student" && pathname.startsWith("/dashboard/student")
-                ? "bg-primary text-white shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <GraduationCap className="w-3.5 h-3.5" />
-            Student View
-          </button>
-          <button
-            onClick={() => handleRoleChange("parent")}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-              role === "parent" && pathname.startsWith("/dashboard/parent")
-                ? "bg-secondary text-white shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Users className="w-3.5 h-3.5" />
-            Parent View
-          </button>
-          <button
-            onClick={() => handleRoleChange("teacher")}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-              role === "teacher" && pathname.startsWith("/dashboard/teacher")
-                ? "bg-indigo-600 text-white shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Award className="w-3.5 h-3.5" />
-            Teacher View
-          </button>
-          <button
-            onClick={() => handleRoleChange("admin")}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-              role === "admin" && pathname.startsWith("/dashboard/admin")
-                ? "bg-rose-600 text-white shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <School className="w-3.5 h-3.5" />
-            Admin View
-          </button>
-          <button
-            onClick={() => handleRoleChange("superadmin")}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-              role === "superadmin" && pathname.startsWith("/dashboard/superadmin")
-                ? "bg-rose-700 text-white shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <ShieldCheck className="w-3.5 h-3.5" />
-            Super Admin View
-          </button>
-          <button
-            onClick={() => handleRoleChange("sandbox")}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-              role === "sandbox" && pathname.startsWith("/sandbox")
-                ? "bg-slate-700 dark:bg-slate-200 text-white dark:text-slate-900 shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <ShieldAlert className="w-3.5 h-3.5" />
-            AI Sandbox
-          </button>
-        </nav>
+        {/* Dynamic Navigation Roles (Linear style tabs) - ONLY visible for Super Admins for demo purposes */}
+        {isLoggedIn && currentRole === "superadmin" && (
+          <nav className="hidden md:flex bg-muted/60 p-1 rounded-full border border-card-border/80">
+            <button
+              onClick={() => handleRoleChange("student")}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                role === "student" && pathname.startsWith("/dashboard/student")
+                  ? "bg-primary text-white shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <GraduationCap className="w-3.5 h-3.5" />
+              Student View
+            </button>
+            <button
+              onClick={() => handleRoleChange("parent")}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                role === "parent" && pathname.startsWith("/dashboard/parent")
+                  ? "bg-secondary text-white shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Users className="w-3.5 h-3.5" />
+              Parent View
+            </button>
+            <button
+              onClick={() => handleRoleChange("teacher")}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                role === "teacher" && pathname.startsWith("/dashboard/teacher")
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Award className="w-3.5 h-3.5" />
+              Teacher View
+            </button>
+            <button
+              onClick={() => handleRoleChange("admin")}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                role === "admin" && pathname.startsWith("/dashboard/admin")
+                  ? "bg-rose-600 text-white shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <School className="w-3.5 h-3.5" />
+              Admin View
+            </button>
+            <button
+              onClick={() => handleRoleChange("superadmin")}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                role === "superadmin" && pathname.startsWith("/dashboard/superadmin")
+                  ? "bg-rose-700 text-white shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              Super Admin View
+            </button>
+            <button
+              onClick={() => handleRoleChange("sandbox")}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                role === "sandbox" && pathname.startsWith("/sandbox")
+                  ? "bg-slate-700 dark:bg-slate-200 text-white dark:text-slate-900 shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <ShieldAlert className="w-3.5 h-3.5" />
+              AI Sandbox
+            </button>
+          </nav>
+        )}
 
         {/* Right side controls */}
         <div className="flex items-center gap-3">
@@ -169,12 +172,40 @@ export default function Navigation() {
             )}
           </div>
 
-          <Link
-            href="/dashboard/student"
-            className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-primary to-secondary hover:brightness-110 active:scale-95 transition-all shadow-md duo-button"
-          >
-            Enter Dashboard
-          </Link>
+          {isLoggedIn ? (
+            <div className="flex items-center gap-2">
+              <Link
+                href={
+                  role === "student" ? "/dashboard/student" :
+                  role === "parent" ? "/dashboard/parent" :
+                  role === "teacher" ? "/dashboard/teacher" :
+                  role === "admin" ? "/dashboard/admin" :
+                  role === "superadmin" ? "/dashboard/superadmin" : "/sandbox"
+                }
+                className="px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-primary to-secondary hover:brightness-110 active:scale-95 transition-all shadow-md duo-button"
+              >
+                Dashboard
+              </Link>
+              <button
+                onClick={() => {
+                  setIsLoggedIn(false);
+                  router.push("/");
+                }}
+                className="px-3 py-2 rounded-xl text-xs font-bold border border-card-border hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            pathname !== "/auth" && (
+              <Link
+                href="/auth"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-primary to-secondary hover:brightness-110 active:scale-95 transition-all shadow-md duo-button"
+              >
+                Sign In
+              </Link>
+            )
+          )}
         </div>
       </div>
     </header>
