@@ -240,6 +240,35 @@ export default function ParentDashboard() {
 
           </div>
 
+          {/* Conversational AI Home Coaching Tips */}
+          <div className="bg-gradient-to-br from-primary/5 to-secondary/5 border border-primary/20 p-6 rounded-3xl shadow-sm space-y-4">
+            <span className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-secondary" /> Conversational AI Home Coaching Tips
+            </span>
+            <div className="p-4 bg-card border border-card-border rounded-2xl text-xs leading-relaxed space-y-2.5">
+              <p className="font-semibold text-foreground">
+                📝 What {studentName || "your child"} is learning today:
+              </p>
+              <p className="text-muted-foreground text-[11px]">
+                Active Topic is <strong>Photosynthesis: Light Absorption</strong>. The class completed experiments with sunlight blocking.
+              </p>
+              
+              <div className="p-3 bg-muted rounded-xl border border-card-border/60 space-y-1.5">
+                <span className="text-[10px] font-bold text-secondary uppercase block">🧪 5-Minute Kitchen Experiment:</span>
+                <p className="text-[10px] text-muted-foreground leading-normal">
+                  Put a green leaf inside a transparent water glass under sunlight. In 10 minutes, ask your child to explain the tiny oxygen bubbles forming on the leaf surface. This is real-world photolysis!
+                </p>
+              </div>
+
+              <div className="p-3 bg-muted rounded-xl border border-card-border/60 space-y-1.5">
+                <span className="text-[10px] font-bold text-indigo-500 uppercase block">🗣️ Dinner Table Question:</span>
+                <p className="text-[10px] text-muted-foreground leading-normal">
+                  "If the sun stops shining for a year, will plants still release oxygen?" (Helps check if they grasp that light energy excitation splits the water molecules).
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* AI recommendations */}
           <div className="bg-card border border-card-border p-6 rounded-3xl shadow-sm space-y-4">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">

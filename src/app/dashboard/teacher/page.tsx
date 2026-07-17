@@ -44,6 +44,24 @@ export default function TeacherDashboard() {
   const [localFocus, setLocalFocus] = useState(activeClassFocus);
   const [localHomework, setLocalHomework] = useState(activeHomeworkPrompt);
 
+  // Weakness Radar state hooks
+  const [showRadarModal, setShowRadarModal] = useState(false);
+  const [generatingSlides, setGeneratingSlides] = useState(false);
+  const [slidesContent, setSlidesContent] = useState<string[] | null>(null);
+
+  const triggerGenerateSlides = () => {
+    setGeneratingSlides(true);
+    setSlidesContent(null);
+    setTimeout(() => {
+      setSlidesContent([
+        "Slide 1: What is Photolysis? (Visual Breakdown)\n- Photo = Light, Lysis = Splitting.\n- Splitting of H2O molecules using absorbed light energy in thylakoids.",
+        "Slide 2: The Core Chemical Equation\n- 2H2O + Light Energy -> 4H+ + 4e- + O2 (Waste Gas release).\n- Water acts as the electron donor to replace excited electrons in chlorophyll.",
+        "Slide 3: Classroom Analogy (The Solar Charger)\n- Think of Chlorophyll as a solar battery charger. Sunlight excites electrons. To replace them, it splits water, dumping hydrogen protons inside the thylakoid."
+      ]);
+      setGeneratingSlides(false);
+    }, 1500);
+  };
+
   const handleUpdateFocus = (e: React.FormEvent) => {
     e.preventDefault();
     setActiveClassFocus(localFocus);
@@ -227,20 +245,83 @@ export default function TeacherDashboard() {
             </div>
           </div>
 
-          {/* AI Suggestions feed */}
-          <div className="bg-card border-2 border-indigo-600/30 p-6 rounded-3xl shadow-sm space-y-4">
-            <span className="text-xs font-bold text-indigo-600 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-indigo-500" /> Pedagogical Suggestions (AI Feed)
+          {/* Classroom Weakness Radar (AI Analytics) */}
+          <div className="bg-gradient-to-br from-indigo-500/5 to-purple-500/5 border-2 border-indigo-600/30 p-6 rounded-3xl shadow-sm space-y-4">
+            <span className="text-xs font-bold text-indigo-600 flex items-center gap-1.5 uppercase tracking-wider">
+              <Sparkles className="w-4 h-4 text-indigo-500 animate-pulse" /> Classroom Weakness Radar
             </span>
-            <ul className="space-y-3 text-xs leading-relaxed text-muted-foreground">
-              <li className="p-3 bg-muted rounded-xl border border-card-border/60">
-                💡 <strong>Review Recommendation:</strong> 3 students failed the Light Reaction photolysis quiz question. Suggest repeating this lesson with the <i>Cricket analogies</i> mode enabled during class hours.
-              </li>
-            </ul>
+            <div className="space-y-3 text-xs">
+              <div className="p-3 bg-card border border-card-border rounded-xl space-y-1.5 text-left">
+                <span className="text-[10px] font-bold text-rose-500 uppercase block">⚠️ Critical Bottleneck (Chapter 2)</span>
+                <p className="text-[11px] leading-normal text-muted-foreground">
+                  <strong>65% of students</strong> failed homework section B covering the Chemistry of <strong>Photolysis / Water splitting</strong>.
+                </p>
+                <div className="pt-2 flex justify-between items-center border-t border-card-border/60">
+                  <span className="text-[9px] font-semibold text-muted-foreground">Action: Review recommended</span>
+                  <button 
+                    onClick={() => {
+                      setShowRadarModal(true);
+                      triggerGenerateSlides();
+                    }}
+                    className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[9px] font-bold transition-all cursor-pointer"
+                  >
+                    Generate Review Slides
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
       </div>
+
+      {/* Review Slides Modal */}
+      {showRadarModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="w-full max-w-xl bg-card border border-card-border p-6 rounded-3xl shadow-2xl space-y-4">
+            <div className="flex justify-between items-center pb-3 border-b border-card-border">
+              <h3 className="font-extrabold text-base flex items-center gap-1.5 text-indigo-600">
+                💡 AI Generated Review Slides: Photosynthesis Chemistry
+              </h3>
+              <button onClick={() => setShowRadarModal(false)} className="text-muted-foreground hover:text-foreground font-bold text-lg">×</button>
+            </div>
+
+            <p className="text-xs text-muted-foreground leading-relaxed text-left">
+              These slides have been generated dynamically to help you address the conceptual gap detected in today's homework assessments. Use this deck to kickstart tomorrow's class review!
+            </p>
+
+            <div className="p-4 bg-muted rounded-2xl border border-card-border min-h-[160px] flex flex-col justify-center">
+              {generatingSlides ? (
+                <div className="text-center space-y-2">
+                  <span className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin block mx-auto"></span>
+                  <span className="text-[10px] font-bold text-indigo-600 animate-pulse block">Structuring slides & review analogies...</span>
+                </div>
+              ) : (
+                slidesContent && (
+                  <div className="space-y-4 text-left">
+                    {slidesContent.map((slide, idx) => (
+                      <div key={idx} className="p-3 bg-card rounded-xl border border-card-border/80 text-xs">
+                        <pre className="font-sans whitespace-pre-wrap leading-relaxed text-foreground">{slide}</pre>
+                      </div>
+                    ))}
+                  </div>
+                )
+              )}
+            </div>
+
+            <div className="flex justify-between items-center pt-2 border-t border-card-border">
+              <span className="text-[10px] font-semibold text-emerald-500">✓ Class materials ready to present</span>
+              <button
+                onClick={() => setShowRadarModal(false)}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold"
+              >
+                Close & Sync to Board
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

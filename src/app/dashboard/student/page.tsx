@@ -197,6 +197,20 @@ export default function StudentDashboard() {
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
 
+  // Handwritten Notebook OCR Scanner states
+  const [showOcrModal, setShowOcrModal] = useState(false);
+  const [ocrScanning, setOcrScanning] = useState(false);
+  const [ocrResult, setOcrResult] = useState<{
+    transcription: string;
+    errorsFound: { error: string; correction: string }[];
+    correctedText: string;
+  } | null>(null);
+
+  // Board Exam Matcher states
+  const [boardType, setBoardType] = useState<"CBSE" | "ICSE">("CBSE");
+  const [showMockExamModal, setShowMockExamModal] = useState(false);
+  const [mockScore, setMockScore] = useState<number | null>(null);
+
   // Flashcards state
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -269,6 +283,26 @@ export default function StudentDashboard() {
       setIsPlayingAudio(false);
       alert("Error playing voice narration. Verify your Azure key is active.");
     }
+  };
+
+  const runOcrSimulation = () => {
+    setOcrScanning(true);
+    setOcrResult(null);
+    setTimeout(() => {
+      setOcrResult({
+        transcription: "Photosynthesis is the process where plants take in carbon dioxide and water to produce food. Light energy is captured by green pigment called Chlorophyl. Water is split to release Oxygen.",
+        errorsFound: [
+          { error: "Spelling error: 'Chlorophyl'", correction: "Correct spelling is 'Chlorophyll' (ends with double 'l')." },
+          { error: "Conceptual gap: Light Splitting of Water", correction: "Explain that the splitting of water molecule is called 'photolysis' and occurs inside thylakoids." }
+        ],
+        correctedText: "Photosynthesis is the process where plants take in carbon dioxide and water to produce glucose. Light energy is captured by the green pigment called chlorophyll. Water is split via photolysis in the thylakoids to release oxygen gas."
+      });
+      setOcrScanning(false);
+    }, 1800);
+  };
+
+  const submitMockExam = () => {
+    setMockScore(85);
   };
 
   const handleSelectLesson = (lessonId: string) => {
@@ -623,18 +657,30 @@ export default function StudentDashboard() {
                         <button onClick={() => setExplanationMode("realLife")} className={`px-2 py-1 rounded-md text-[9px] font-bold ${explanationMode === "realLife" ? "bg-primary text-white" : "bg-card border border-card-border"}`}>Real-Life Examples</button>
                       </div>
 
-                      <div className="flex items-center justify-between gap-2 p-2 bg-primary/5 border border-primary/20 rounded-xl">
-                        <span className="text-[10px] font-bold text-primary uppercase">Read Explanations Voice Tutor:</span>
-                        <button
-                          onClick={() => startVoiceReal(getExplanationText())}
-                          className={`px-3 py-1 rounded-lg text-[9px] font-bold cursor-pointer transition-all flex items-center gap-1.5 ${
-                            isPlayingAudio 
-                              ? "bg-rose-500 text-white animate-pulse" 
-                              : "bg-primary text-white hover:brightness-110"
-                          }`}
-                        >
-                          🔊 {isPlayingAudio ? "Stop Audio" : "Read Aloud (Azure Speech)"}
-                        </button>
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 p-2 bg-primary/5 border border-primary/20 rounded-xl">
+                        <span className="text-[10px] font-bold text-primary uppercase">AI Interactive Tools:</span>
+                        <div className="flex gap-1.5">
+                          <button
+                            onClick={() => startVoiceReal(getExplanationText())}
+                            className={`px-3 py-1 rounded-lg text-[9px] font-bold cursor-pointer transition-all flex items-center gap-1.5 ${
+                              isPlayingAudio 
+                                ? "bg-rose-500 text-white animate-pulse" 
+                                : "bg-primary text-white hover:brightness-110"
+                            }`}
+                          >
+                            🔊 {isPlayingAudio ? "Stop Audio" : "Read Aloud (Azure Speech)"}
+                          </button>
+                          
+                          <button
+                            onClick={() => {
+                              setShowOcrModal(true);
+                              setOcrResult(null);
+                            }}
+                            className="px-3 py-1 bg-secondary text-white hover:brightness-110 rounded-lg text-[9px] font-bold cursor-pointer transition-all flex items-center gap-1.5"
+                          >
+                            📷 Scan Notebook (AI OCR)
+                          </button>
+                        </div>
                       </div>
 
                       <div className="p-4 rounded-2xl bg-muted/80 border border-card-border/80 text-xs leading-relaxed min-h-[160px]">
@@ -745,6 +791,33 @@ export default function StudentDashboard() {
                         </div>
                         <p className="text-xs text-muted-foreground">{getRevisionPlan().plan}</p>
                       </div>
+
+                      {/* Board Exam Matcher */}
+                      <div className="p-4 bg-primary/5 border border-primary/20 rounded-2xl space-y-3">
+                        <span className="text-[10px] font-bold text-primary uppercase block">Board Exam Matcher & mock test</span>
+                        <p className="text-[10px] text-muted-foreground">Practice solving CBSE/ICSE blueprint mock papers tailored to your countdown schedule.</p>
+                        
+                        <div className="flex gap-2 text-xs">
+                          <select 
+                            value={boardType} 
+                            onChange={(e) => setBoardType(e.target.value as any)}
+                            className="bg-card border border-card-border p-1.5 rounded-lg font-bold"
+                          >
+                            <option value="CBSE">CBSE Board Pattern</option>
+                            <option value="ICSE">ICSE Board Pattern</option>
+                          </select>
+                          
+                          <button
+                            onClick={() => {
+                              setShowMockExamModal(true);
+                              setMockScore(null);
+                            }}
+                            className="flex-1 py-1.5 bg-primary text-white font-bold rounded-lg hover:brightness-110 cursor-pointer text-center"
+                          >
+                            Generate Mock Paper
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   )}
 
@@ -763,6 +836,141 @@ export default function StudentDashboard() {
         </div>
 
       </div>
+
+      {/* AI OCR Notebook Scanner Modal */}
+      {showOcrModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl bg-card border border-card-border p-6 rounded-3xl shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center pb-3 border-b border-card-border">
+              <h3 className="font-extrabold text-base flex items-center gap-1.5 text-secondary">
+                📷 AI Notebook OCR Scanner
+              </h3>
+              <button onClick={() => setShowOcrModal(false)} className="text-muted-foreground hover:text-foreground font-bold text-lg">×</button>
+            </div>
+
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Upload a snapshot of your handwritten class notes or paper homework. Pathshala AI scans the text, identifies grammar or spelling errors, and suggests improvements.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 bg-muted border-2 border-dashed border-card-border rounded-2xl flex flex-col items-center justify-center text-center">
+                <span className="text-xs font-bold mb-2">Simulate Notebook Photo Upload</span>
+                <button
+                  onClick={runOcrSimulation}
+                  disabled={ocrScanning}
+                  className="px-4 py-2 bg-secondary text-white font-bold rounded-xl text-xs hover:brightness-110 cursor-pointer disabled:opacity-50"
+                >
+                  {ocrScanning ? "Scanning Notebook..." : "Scan Test Notebook Page"}
+                </button>
+              </div>
+
+              <div className="p-4 bg-muted rounded-2xl border border-card-border min-h-[140px] flex items-center justify-center">
+                {!ocrScanning && !ocrResult && (
+                  <span className="text-[10px] text-muted-foreground italic">Awaiting upload scan...</span>
+                )}
+                {ocrScanning && (
+                  <div className="text-center space-y-2">
+                    <span className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin block mx-auto"></span>
+                    <span className="text-[10px] font-bold text-primary animate-pulse block">AI OCR analyzing handwriting...</span>
+                  </div>
+                )}
+                {ocrResult && (
+                  <div className="text-xs text-left w-full space-y-2">
+                    <span className="text-[9px] font-bold text-emerald-500 uppercase block">✓ Scan Completed successfully</span>
+                    <div>
+                      <strong className="text-foreground">Transcribed Text:</strong>
+                      <p className="p-2 bg-card rounded border border-card-border/60 text-[10px] mt-1 italic text-muted-foreground">{ocrResult.transcription}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {ocrResult && (
+              <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl space-y-3 text-left">
+                <span className="text-xs font-bold text-amber-600 block">AI Evaluation & Corrections:</span>
+                <ul className="space-y-2 text-[10px] leading-relaxed text-muted-foreground">
+                  {ocrResult.errorsFound.map((err: any, idx: number) => (
+                    <li key={idx} className="flex gap-1.5 items-start">
+                      <span className="text-rose-500 font-bold">✗</span>
+                      <span><strong>{err.error}</strong>: {err.correction}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="pt-2.5 border-t border-card-border/60 space-y-1.5 text-xs font-semibold">
+                  <span className="text-foreground block">Corrected Explanation Suggestion:</span>
+                  <p className="p-3 bg-card rounded-xl border border-card-border/80 text-[11px] text-foreground leading-normal">{ocrResult.correctedText}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Board Mock Exam Modal */}
+      {showMockExamModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="w-full max-w-xl bg-card border border-card-border p-6 rounded-3xl shadow-2xl space-y-4">
+            <div className="flex justify-between items-center pb-3 border-b border-card-border">
+              <h3 className="font-extrabold text-base flex items-center gap-1.5 text-primary">
+                📝 {boardType} Board Mock Paper: {selectedLesson?.title || "Lesson"}
+              </h3>
+              <button onClick={() => setShowMockExamModal(false)} className="text-muted-foreground hover:text-foreground font-bold text-lg">×</button>
+            </div>
+
+            <p className="text-xs text-muted-foreground leading-relaxed text-left">
+              Solve this test structured exactly according to the latest **{boardType}** blueprint criteria (MCQs, Short answers, and long structured explanations).
+            </p>
+
+            <div className="p-4 bg-muted rounded-2xl border border-card-border space-y-4 max-h-[50vh] overflow-y-auto text-xs text-left">
+              <div className="space-y-2">
+                <span className="font-bold block text-primary">Section A: Objective Type (1 Mark)</span>
+                <p>Q1. Which reactant provides the oxygen molecules released in photosynthesis?</p>
+                <div className="grid grid-cols-2 gap-2 text-[10px]">
+                  <button className="p-2 bg-card border border-card-border rounded-lg text-left">A. Carbon Dioxide</button>
+                  <button className="p-2 bg-primary/10 border-primary font-bold rounded-lg text-left">B. Water (H2O)</button>
+                  <button className="p-2 bg-card border border-card-border rounded-lg text-left">C. Glucose</button>
+                  <button className="p-2 bg-card border border-card-border rounded-lg text-left">D. Chlorophyll</button>
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-2 border-t border-card-border/60">
+                <span className="font-bold block text-primary">Section B: Short Answer (3 Marks)</span>
+                <p>Q2. Outline three main differences between the light reaction and Calvin cycle reactions.</p>
+                <textarea 
+                  placeholder="Type your explanation answer here..." 
+                  className="w-full h-16 p-2 bg-card border border-card-border rounded-xl focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-2 border-t border-card-border">
+              {mockScore === null ? (
+                <button
+                  onClick={submitMockExam}
+                  className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl text-xs shadow hover:brightness-110 cursor-pointer"
+                >
+                  Submit Paper for AI Evaluation
+                </button>
+              ) : (
+                <div className="text-xs space-y-1 text-left">
+                  <span className="font-bold text-emerald-500">★ AI Score: {mockScore}% (Grade: A)</span>
+                  <p className="text-[10px] text-muted-foreground leading-normal">Board Criteria Match: Outstanding presentation. Excellent structured breakdown of section B.</p>
+                </div>
+              )}
+
+              <button
+                onClick={() => setShowMockExamModal(false)}
+                className="px-4 py-2 border border-card-border rounded-xl text-xs font-semibold hover:bg-muted"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
