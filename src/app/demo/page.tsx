@@ -66,28 +66,36 @@ export default function PublicVoiceDemo() {
     }
   };
 
-  const handleSendVoicePrompt = (text: string) => {
+  const handleSendVoicePrompt = async (text: string) => {
     setRateLimit(prev => prev + 1);
     setAiResponse("AI is formulating your scientific answer...");
     
-    // Simulate AI tutor answering
-    setTimeout(async () => {
-      let reply = "";
-      const query = text.toLowerCase();
-      
+    try {
       const langName = lang === "hi-IN" ? "Hindi" : lang === "ta-IN" ? "Tamil" : "English";
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, language: langName }),
+      });
 
-      if (lang === "hi-IN") {
-        reply = `यह एक बहुत अच्छा प्रश्न है! प्रकाश संश्लेषण (Photosynthesis) वह प्रक्रिया है जिसके द्वारा हरे पौधे सूर्य के प्रकाश का उपयोग करके पानी और कार्बन डाइऑक्साइड को ग्लूकोज में बदलते हैं। इस प्रक्रिया में ऑक्सीजन गैस बाहर निकलती है।`;
-      } else if (lang === "ta-IN") {
-        reply = `இது ஒரு சிறந்த கேள்வி! ஒளிச்சேர்க்கை (Photosynthesis) என்பது பச்சை தாவரங்கள் சூரிய ஒளியைப் பயன்படுத்தி நீர் மற்றும் கார்பன் டை ஆக்சைடை உணவாக மாற்றும் செயல்முறையாகும். இந்த செயல்பாட்டில் ஆக்ஸிஜன் வாயு வெளியிடப்படுகிறது.`;
-      } else {
-        reply = `That is an excellent question! Photosynthesis is the chemical process where green plants absorb sunlight energy via chlorophyll to convert carbon dioxide and water into glucose. Gaseous Oxygen is released as a vital byproduct.`;
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "AI API Call failed" }));
+        const fallbackMessage = err.error || "Failed to connect to AI server.";
+        setAiResponse(fallbackMessage);
+        speakBack(fallbackMessage, langName);
+        return;
       }
 
-      setAiResponse(reply);
-      speakBack(reply, langName);
-    }, 1200);
+      const data = await res.json();
+      const aiReply = data.text;
+      setAiResponse(aiReply);
+      speakBack(aiReply, langName);
+    } catch (error: any) {
+      console.error(error);
+      const fallbackMessage = "Error connecting to AI. Make sure you set your GEMINI_API_KEY in the environment.";
+      setAiResponse(fallbackMessage);
+      speakBack(fallbackMessage, "English");
+    }
   };
 
   const speakBack = async (textToSpeak: string, language: string) => {
