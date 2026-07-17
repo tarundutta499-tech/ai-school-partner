@@ -49,6 +49,51 @@ export default function TeacherDashboard() {
   const [generatingSlides, setGeneratingSlides] = useState(false);
   const [slidesContent, setSlidesContent] = useState<string[] | null>(null);
 
+  // AI Worksheet/Test and Lesson Planner states
+  const [showTestModal, setShowTestModal] = useState(false);
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [testDifficulty, setTestDifficulty] = useState("Medium");
+  const [testQType, setTestQType] = useState("MCQ");
+  const [testQuestions, setTestQuestions] = useState<{ q: string; points: string }[] | null>(null);
+  const [generatingTest, setGeneratingTest] = useState(false);
+  const [generatedPlan, setGeneratedPlan] = useState<{ topic: string; duration: string; goals: string[]; flow: string[] } | null>(null);
+  const [generatingPlan, setGeneratingPlan] = useState(false);
+
+  const generateTestDocs = () => {
+    setGeneratingTest(true);
+    setTestQuestions(null);
+    setTimeout(() => {
+      setTestQuestions([
+        { q: "Define photolysis of water and state the primary waste gas byproduct.", points: "3 Marks" },
+        { q: "Where does the light-independent Calvin cycle reaction occur inside chloroplasts?", points: "1 Mark" },
+        { q: "Outline cyclic vs non-cyclic photophosphorylation processes step-by-step.", points: "5 Marks" }
+      ]);
+      setGeneratingTest(false);
+    }, 1200);
+  };
+
+  const generateLessonPlanDocs = () => {
+    setGeneratingPlan(true);
+    setGeneratedPlan(null);
+    setTimeout(() => {
+      setGeneratedPlan({
+        topic: `Photosynthesis: Class 10th ${localFocus || "Light Reactions"}`,
+        duration: "45 Minutes",
+        goals: [
+          "Understand light absorption by chlorophyll pigments.",
+          "Trace the splitting of water molecules to release Oxygen gas.",
+          "Identify ATP & NADPH synthesis pathways."
+        ],
+        flow: [
+          "10 Mins: Introduction recap of chloroplast anatomy.",
+          "20 Mins: Core diagram explanations & photon chemistry animation walkthrough.",
+          "15 Mins: Practice board questions and check homework balances."
+        ]
+      });
+      setGeneratingPlan(false);
+    }, 1200);
+  };
+
   const triggerGenerateSlides = () => {
     setGeneratingSlides(true);
     setSlidesContent(null);
@@ -83,10 +128,22 @@ export default function TeacherDashboard() {
           <p className="text-xs text-muted-foreground mt-1">School: <strong className="text-foreground">{schoolName || "Configure School Name"}</strong></p>
         </div>
         <div className="flex gap-2 text-xs font-bold">
-          <button onClick={() => alert("Creating custom board test...")} className="px-3 py-1.5 rounded-xl border border-card-border bg-card hover:bg-muted cursor-pointer">
+          <button 
+            onClick={() => {
+              setShowTestModal(true);
+              setTestQuestions(null);
+            }} 
+            className="px-3 py-1.5 rounded-xl border border-card-border bg-card hover:bg-muted cursor-pointer"
+          >
             Create Test
           </button>
-          <button onClick={() => alert("Generating lesson plan details...")} className="px-3 py-1.5 rounded-xl border border-card-border bg-card hover:bg-muted cursor-pointer">
+          <button 
+            onClick={() => {
+              setShowPlanModal(true);
+              setGeneratedPlan(null);
+            }} 
+            className="px-3 py-1.5 rounded-xl border border-card-border bg-card hover:bg-muted cursor-pointer"
+          >
             Generate Lesson Plan
           </button>
         </div>
@@ -236,10 +293,22 @@ export default function TeacherDashboard() {
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">Worksheet & Notes Generator</span>
             <p className="text-xs text-muted-foreground leading-relaxed">Instantly generate printable study notes or board-aligned worksheets based on syllabus PDFs.</p>
             <div className="space-y-2">
-              <button onClick={() => alert("Generating CBSE worksheet PDF...")} className="w-full py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 cursor-pointer">
+              <button 
+                onClick={() => {
+                  setShowTestModal(true);
+                  setTestQuestions(null);
+                }} 
+                className="w-full py-2 bg-indigo-600 hover:brightness-110 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 cursor-pointer"
+              >
                 <ClipboardCheck className="w-4 h-4" /> Generate Practice Worksheet
               </button>
-              <button onClick={() => alert("Downloading lesson notes package...")} className="w-full py-2 bg-muted border border-card-border text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 cursor-pointer">
+              <button 
+                onClick={() => {
+                  setShowPlanModal(true);
+                  setGeneratedPlan(null);
+                }} 
+                className="w-full py-2 bg-muted border border-card-border text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 cursor-pointer"
+              >
                 <FileDown className="w-4 h-4" /> Download Chapter Lesson Notes
               </button>
             </div>
@@ -318,6 +387,166 @@ export default function TeacherDashboard() {
                 Close & Sync to Board
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Test / Worksheet Generator Modal */}
+      {showTestModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="w-full max-w-xl bg-card border border-card-border p-6 rounded-3xl shadow-2xl space-y-4">
+            <div className="flex justify-between items-center pb-3 border-b border-card-border">
+              <h3 className="font-extrabold text-base text-indigo-600">
+                📝 AI Exam & Worksheet Builder
+              </h3>
+              <button onClick={() => setShowTestModal(false)} className="text-muted-foreground hover:text-foreground font-bold text-lg">×</button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="space-y-1.5">
+                <label className="font-bold text-muted-foreground uppercase text-[9px]">Select Difficulty</label>
+                <select 
+                  value={testDifficulty} 
+                  onChange={(e) => setTestDifficulty(e.target.value)}
+                  className="w-full p-2 bg-muted border border-card-border rounded-xl font-bold"
+                >
+                  <option value="Easy">Easy Level</option>
+                  <option value="Medium">Medium Level</option>
+                  <option value="Hard">Hard Board Prep</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-muted-foreground uppercase text-[9px]">Question Type</label>
+                <select 
+                  value={testQType} 
+                  onChange={(e) => setTestQType(e.target.value)}
+                  className="w-full p-2 bg-muted border border-card-border rounded-xl font-bold"
+                >
+                  <option value="MCQ">Board MCQs</option>
+                  <option value="Short">Short Explanations</option>
+                  <option value="Mix">Mixed Blueprint Paper</option>
+                </select>
+              </div>
+            </div>
+
+            <button
+              onClick={generateTestDocs}
+              disabled={generatingTest}
+              className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
+            >
+              {generatingTest ? "Synthesizing test blueprint..." : "Generate Worksheet / Mock Paper"}
+            </button>
+
+            {generatingTest && (
+              <div className="text-center py-6 space-y-2">
+                <span className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin block mx-auto"></span>
+                <span className="text-[10px] text-indigo-600 animate-pulse font-bold">Assembling classroom test paper...</span>
+              </div>
+            )}
+
+            {testQuestions && (
+              <div className="space-y-3 pt-2 text-xs text-left max-h-[300px] overflow-y-auto pr-1">
+                <span className="font-bold text-indigo-600 block">Generated Practice Sheet ({testDifficulty}):</span>
+                <div className="space-y-2.5 p-3 bg-muted rounded-2xl border border-card-border">
+                  {testQuestions.map((q, idx) => (
+                    <div key={idx} className="space-y-1 p-2 bg-card border border-card-border/60 rounded-xl">
+                      <p className="font-semibold text-foreground">Q{idx + 1}. {q.q}</p>
+                      <span className="text-[9px] text-muted-foreground uppercase font-bold">{q.points}</span>
+                    </div>
+                  ))}
+                </div>
+                
+                <button 
+                  onClick={() => {
+                    alert("Successfully compiled test! Sent to students dashboard.");
+                    setShowTestModal(false);
+                  }}
+                  className="w-full py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-xs cursor-pointer"
+                >
+                  Publish to Students Dashboards
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Generate Lesson Plan Modal */}
+      {showPlanModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="w-full max-w-xl bg-card border border-card-border p-6 rounded-3xl shadow-2xl space-y-4">
+            <div className="flex justify-between items-center pb-3 border-b border-card-border">
+              <h3 className="font-extrabold text-base text-indigo-600">
+                📚 AI Lesson Planner & Study Notes
+              </h3>
+              <button onClick={() => setShowPlanModal(false)} className="text-muted-foreground hover:text-foreground font-bold text-lg">×</button>
+            </div>
+
+            <p className="text-xs text-muted-foreground leading-normal text-left">
+              Draft structured 45-minute lesson timelines and reference notes for the active chapter.
+            </p>
+
+            <button
+              onClick={generateLessonPlanDocs}
+              disabled={generatingPlan}
+              className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
+            >
+              {generatingPlan ? "Structuring lesson outline..." : "Generate AI Lesson Plan"}
+            </button>
+
+            {generatingPlan && (
+              <div className="text-center py-6 space-y-2">
+                <span className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin block mx-auto"></span>
+                <span className="text-[10px] text-indigo-600 animate-pulse font-bold">Aligning milestones to CBSE blueprint...</span>
+              </div>
+            )}
+
+            {generatedPlan && (
+              <div className="space-y-4 pt-2 text-xs text-left max-h-[300px] overflow-y-auto pr-1">
+                <div className="p-3 bg-muted border border-card-border rounded-2xl space-y-2.5">
+                  <div>
+                    <strong className="text-foreground block">Topic Focus:</strong>
+                    <p className="text-muted-foreground">{generatedPlan.topic} ({generatedPlan.duration})</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <strong className="text-foreground block">Key Learning Goals:</strong>
+                    <ul className="list-disc pl-4 space-y-1 text-muted-foreground">
+                      {generatedPlan.goals.map((g, idx) => <li key={idx}>{g}</li>)}
+                    </ul>
+                  </div>
+
+                  <div className="space-y-1">
+                    <strong className="text-foreground block">Lesson Milestones:</strong>
+                    <ul className="list-decimal pl-4 space-y-1 text-muted-foreground">
+                      {generatedPlan.flow.map((f, idx) => <li key={idx}>{f}</li>)}
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => {
+                      alert("Notes compiled! PDF download started.");
+                      setShowPlanModal(false);
+                    }}
+                    className="flex-1 py-2 bg-muted border border-card-border text-foreground font-bold rounded-xl cursor-pointer"
+                  >
+                    💾 Download PDF
+                  </button>
+                  <button 
+                    onClick={() => {
+                      alert("Linked syllabus outline to teacher calendar.");
+                      setShowPlanModal(false);
+                    }}
+                    className="flex-1 py-2 bg-indigo-600 text-white font-bold rounded-xl cursor-pointer"
+                  >
+                    Link to Calendar
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
