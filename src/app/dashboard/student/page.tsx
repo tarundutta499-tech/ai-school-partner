@@ -430,36 +430,10 @@ export default function StudentDashboard() {
     setDocChatLog(prev => [...prev, { sender: "user", text: q }]);
     setDocInput("");
     
-    setTimeout(async () => {
+    setTimeout(() => {
       let answer = `According to page 4 of the uploaded document "${docFile}": The light-dependent reactions take place on the thylakoid membranes where energy-exciting pigments generate ATP and NADPH, releasing gaseous Oxygen as a chemical byproduct.`;
       setDocChatLog(prev => [...prev, { sender: "doc", text: answer }]);
-      
-      // Auto-play the document talking answer using Azure TTS!
-      setDocTalking(true);
-      try {
-        const res = await fetch("/api/tts", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: answer, language: preferredLanguage }),
-        });
-        if (res.ok) {
-          const audioBlob = await res.blob();
-          const url = URL.createObjectURL(audioBlob);
-          const audio = new Audio(url);
-          setAudioElement(audio);
-          audio.play();
-          audio.onended = () => {
-            setDocTalking(false);
-            URL.revokeObjectURL(url);
-          };
-        } else {
-          setDocTalking(false);
-        }
-      } catch (e) {
-        console.error(e);
-        setDocTalking(false);
-      }
-    }, 1000);
+    }, 800);
   };
 
   const handleSelectLesson = (lessonId: string) => {
@@ -893,10 +867,10 @@ export default function StudentDashboard() {
                   </div>
                 </div>
 
-                {/* 4. talking Document Reader */}
+                {/* 4. Interactive Document Chat */}
                 <div className="p-4 bg-muted border border-card-border rounded-2xl space-y-3 text-left">
                   <div className="flex justify-between items-center pb-2 border-b border-card-border/60">
-                    <span className="text-[9px] font-black text-rose-600 dark:text-rose-400 uppercase">📁 talking Document Reader (RAG + Audio)</span>
+                    <span className="text-[9px] font-black text-rose-600 dark:text-rose-400 uppercase">📁 Interactive Document Chat (RAG)</span>
                     <select
                       value={docFile || ""}
                       onChange={(e) => {
@@ -921,20 +895,15 @@ export default function StudentDashboard() {
                       <>
                         <div className="p-2 bg-muted border border-card-border/60 rounded-xl self-start">
                           <span className="text-[8px] opacity-75 block font-bold text-rose-500 uppercase">Document</span>
-                          Loaded document: <strong>{docFile}</strong>. Ask me any question, and I will search inside the pages and speak the answers back to you!
+                          I am the document <strong>{docFile}</strong>. Ask me any question, and I will explain and answer you strictly using my page contents!
                         </div>
                         {docChatLog.map((m, idx) => (
                           <div key={idx} className={`p-2 rounded-xl max-w-[85%] leading-normal ${m.sender === "user" ? "bg-primary/10 border border-primary/20 self-end text-right" : "bg-rose-500/10 border border-rose-500/20 self-start"}`}>
-                            <strong className="block text-[8px] opacity-75 uppercase mb-0.5">{m.sender === "user" ? "You" : "Document Voice"}</strong>
+                            <strong className="block text-[8px] opacity-75 uppercase mb-0.5">{m.sender === "user" ? "You" : docFile}</strong>
                             {m.text}
                           </div>
                         ))}
                       </>
-                    )}
-                    {docTalking && (
-                      <span className="text-[9px] text-rose-500 animate-pulse font-bold flex items-center gap-1">
-                        🔊 Document is speaking answer aloud...
-                      </span>
                     )}
                   </div>
 
