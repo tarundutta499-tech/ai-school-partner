@@ -106,15 +106,15 @@ export default function AuthPage() {
           {authMethod === "email" && (
             <>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase">Email Address</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase">Email Address or Student ID</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                   <input
-                    type="email"
+                    type="text"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="student@school.edu"
+                    placeholder="student@school.edu or roll_102"
                     className="w-full pl-10 pr-4 py-2 bg-muted border border-card-border rounded-xl text-xs focus:outline-none focus:border-primary"
                   />
                 </div>
