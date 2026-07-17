@@ -211,6 +211,35 @@ export default function StudentDashboard() {
   const [showMockExamModal, setShowMockExamModal] = useState(false);
   const [mockScore, setMockScore] = useState<number | null>(null);
 
+  // Global Central Column Mode: "map" or "discovery"
+  const [centerMode, setCenterMode] = useState<"map" | "discovery">("map");
+
+  // Podcast module states
+  const [podcastTopic, setPodcastTopic] = useState("");
+  const [podcastLang, setPodcastLang] = useState("English");
+  const [podcastGenerating, setPodcastGenerating] = useState(false);
+  const [podcastScript, setPodcastScript] = useState<{ speaker: string; text: string }[] | null>(null);
+  const [podcastPlaying, setPodcastPlaying] = useState(false);
+
+  // Illustration module states
+  const [imgPrompt, setImgPrompt] = useState("");
+  const [imgGenerating, setImgGenerating] = useState(false);
+  const [generatedImgUrl, setGeneratedImgUrl] = useState<string | null>(null);
+
+  // Character Chat states
+  const [charSelect, setCharSelect] = useState("Einstein");
+  const [charInput, setCharInput] = useState("");
+  const [charLog, setCharLog] = useState<{ sender: "user" | "char"; text: string }[]>([
+    { sender: "char", text: "Hello! I am Albert Einstein. Ask me about relativity, E=mc², or how we understand the physics of our universe!" }
+  ]);
+  const [charTyping, setCharTyping] = useState(false);
+
+  // Talking Document Reader states
+  const [docFile, setDocFile] = useState<string | null>(null);
+  const [docInput, setDocInput] = useState("");
+  const [docChatLog, setDocChatLog] = useState<{ sender: "user" | "doc"; text: string }[]>([]);
+  const [docTalking, setDocTalking] = useState(false);
+
   // Flashcards state
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -303,6 +332,134 @@ export default function StudentDashboard() {
 
   const submitMockExam = () => {
     setMockScore(85);
+  };
+
+  // AI Discovery Lab functions
+  const generatePodcast = () => {
+    if (!podcastTopic.trim()) return;
+    setPodcastGenerating(true);
+    setPodcastScript(null);
+    setTimeout(() => {
+      setPodcastScript([
+        { speaker: "Host (Rahul)", text: `Welcome to Pathshala AI podcasts! Today, we are deep diving into: "${podcastTopic}". I'm joined by Dr. Sarah.` },
+        { speaker: "Expert (Sarah)", text: `Great to be here! This topic is crucial because it helps us understand structural energy transitions and how modern science categorizes elements.` },
+        { speaker: "Host (Rahul)", text: `Absolutely. If you had to explain it to a student in class 10, what's the core key concept they must memorize?` },
+        { speaker: "Expert (Sarah)", text: `Focus on the primary reactants and the reaction triggers. Memorize the formula equations, and the rest becomes simple logic!` }
+      ]);
+      setPodcastGenerating(false);
+    }, 1500);
+  };
+
+  const playPodcastAudio = async () => {
+    if (podcastPlaying) {
+      if (audioElement) {
+        audioElement.pause();
+        audioElement.currentTime = 0;
+      }
+      setPodcastPlaying(false);
+      return;
+    }
+    if (!podcastScript) return;
+    
+    // Concatenate script to read
+    const fullText = podcastScript.map(line => `${line.speaker} says: ${line.text}`).join(". ");
+    setPodcastPlaying(true);
+    
+    try {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: fullText, language: podcastLang }),
+      });
+      if (!res.ok) {
+        alert("Azure Speech Key not configured in env variables for Podcast narration.");
+        setPodcastPlaying(false);
+        return;
+      }
+      const audioBlob = await res.blob();
+      const url = URL.createObjectURL(audioBlob);
+      const audio = new Audio(url);
+      setAudioElement(audio);
+      audio.play();
+      audio.onended = () => {
+        setPodcastPlaying(false);
+        URL.revokeObjectURL(url);
+      };
+    } catch (e) {
+      console.error(e);
+      setPodcastPlaying(false);
+    }
+  };
+
+  const generateIllustration = () => {
+    if (!imgPrompt.trim()) return;
+    setImgGenerating(true);
+    setGeneratedImgUrl(null);
+    setTimeout(() => {
+      setGeneratedImgUrl("/photosynthesis_roadmap.png"); // placeholder using existing asset references
+      setImgGenerating(false);
+    }, 1500);
+  };
+
+  const sendCharacterMessage = () => {
+    if (!charInput.trim()) return;
+    const userText = charInput;
+    setCharLog(prev => [...prev, { sender: "user", text: userText }]);
+    setCharInput("");
+    setCharTyping(true);
+    
+    setTimeout(() => {
+      let reply = "";
+      if (charSelect === "Einstein") {
+        reply = `Ah, interesting question! Regarding "${userText}": My theory of Special Relativity states that the laws of physics are the same for all non-accelerating observers, and that the speed of light in a vacuum is independent of the motion of all observers. Think of it as a cosmic speed limit!`;
+      } else if (charSelect === "Curie") {
+        reply = `An outstanding question. In my research with radioactivity—a term I coined—I discovered that the activity of uranium compounds depends only on the proportion of uranium present. This proved that radioactivity is an atomic property of the element!`;
+      } else if (charSelect === "Newton") {
+        reply = `To understand this, we must look to my Second Law: Force equals mass times acceleration (F=ma). The change of motion is proportional to the motive force impressed, and is made in the direction of the right line in which that force is impressed.`;
+      } else {
+        reply = `In my treatise, Aryabhatiya, I formulated the rotation of the Earth on its axis and computed astronomical values that match modern parameters with extreme precision, utilizing my zero decimal place notation values.`;
+      }
+      setCharLog(prev => [...prev, { sender: "char", text: reply }]);
+      setCharTyping(false);
+    }, 1200);
+  };
+
+  const sendDocQuestion = () => {
+    if (!docInput.trim() || !docFile) return;
+    const q = docInput;
+    setDocChatLog(prev => [...prev, { sender: "user", text: q }]);
+    setDocInput("");
+    
+    setTimeout(async () => {
+      let answer = `According to page 4 of the uploaded document "${docFile}": The light-dependent reactions take place on the thylakoid membranes where energy-exciting pigments generate ATP and NADPH, releasing gaseous Oxygen as a chemical byproduct.`;
+      setDocChatLog(prev => [...prev, { sender: "doc", text: answer }]);
+      
+      // Auto-play the document talking answer using Azure TTS!
+      setDocTalking(true);
+      try {
+        const res = await fetch("/api/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: answer, language: preferredLanguage }),
+        });
+        if (res.ok) {
+          const audioBlob = await res.blob();
+          const url = URL.createObjectURL(audioBlob);
+          const audio = new Audio(url);
+          setAudioElement(audio);
+          audio.play();
+          audio.onended = () => {
+            setDocTalking(false);
+            URL.revokeObjectURL(url);
+          };
+        } else {
+          setDocTalking(false);
+        }
+      } catch (e) {
+        console.error(e);
+        setDocTalking(false);
+      }
+    }, 1000);
   };
 
   const handleSelectLesson = (lessonId: string) => {
@@ -518,62 +675,292 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        {/* Center: Curriculum Path Map */}
-        <div className="bg-card border border-card-border rounded-3xl p-6 shadow-sm relative overflow-hidden flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-4 border-b border-card-border/80 mb-6">
-              <div>
-                <span className="text-[9px] font-bold text-primary uppercase">Active Chapter</span>
-                <h3 className="font-extrabold text-sm">Photosynthesis: Lesson roadmap</h3>
+        {/* Center Column: Study Map OR AI Discovery Lab */}
+        <div className="bg-card border border-card-border rounded-3xl p-6 shadow-sm relative overflow-hidden flex flex-col justify-between col-span-1">
+          {/* Main workspace selector header */}
+          <div className="flex bg-muted p-1 rounded-xl border border-card-border mb-6">
+            <button
+              onClick={() => setCenterMode("map")}
+              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                centerMode === "map" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              🗺️ Learning Map
+            </button>
+            <button
+              onClick={() => setCenterMode("discovery")}
+              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                centerMode === "discovery" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              🧪 AI Discovery Lab
+            </button>
+          </div>
+
+          {centerMode === "map" ? (
+            <div>
+              <div className="flex items-center justify-between pb-4 border-b border-card-border/80 mb-6">
+                <div>
+                  <span className="text-[9px] font-bold text-primary uppercase">Active Chapter</span>
+                  <h3 className="font-extrabold text-sm">Photosynthesis: Lesson roadmap</h3>
+                </div>
+                <button 
+                  onClick={() => handleSelectLesson("1")}
+                  className="px-3 py-1.5 rounded-xl bg-primary text-white text-[10px] font-bold flex items-center gap-1 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+                >
+                  <BrainCircuit className="w-3.5 h-3.5" /> Continue Learning
+                </button>
               </div>
-              <button 
-                onClick={() => handleSelectLesson("1")}
-                className="px-3 py-1.5 rounded-xl bg-primary text-white text-[10px] font-bold flex items-center gap-1 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
-              >
-                <BrainCircuit className="w-3.5 h-3.5" /> Continue Learning
-              </button>
-            </div>
 
-            {/* Curriculum Roadmap Journey nodes */}
-            <div className="relative py-8 flex flex-col items-center">
-              <div className="absolute top-0 bottom-0 w-1 timeline-line rounded-full z-0"></div>
+              {/* Curriculum Roadmap Journey nodes */}
+              <div className="relative py-8 flex flex-col items-center">
+                <div className="absolute top-0 bottom-0 w-1 timeline-line rounded-full z-0"></div>
 
-              {lessons.map((lesson, idx) => {
-                const isCompleted = lesson.completed;
-                const isFirstUncompleted = !isCompleted && (idx === 0 || lessons[idx - 1].completed);
-                const isLocked = !isCompleted && !isFirstUncompleted;
+                {lessons.map((lesson, idx) => {
+                  const isCompleted = lesson.completed;
+                  const isFirstUncompleted = !isCompleted && (idx === 0 || lessons[idx - 1].completed);
+                  const isLocked = !isCompleted && !isFirstUncompleted;
 
-                const offsetClasses = [
-                  "translate-x-0",
-                  "translate-x-12",
-                  "translate-x-0",
-                  "-translate-x-12",
-                  "translate-x-0"
-                ];
+                  const offsetClasses = [
+                    "translate-x-0",
+                    "translate-x-12",
+                    "translate-x-0",
+                    "-translate-x-12",
+                    "translate-x-0"
+                  ];
 
-                return (
-                  <div 
-                    key={lesson.id} 
-                    className={`relative z-10 my-6 flex flex-col items-center ${offsetClasses[idx % 5]}`}
-                  >
-                    <button
-                      disabled={isLocked}
-                      onClick={() => handleSelectLesson(lesson.id)}
-                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm shadow-md transition-all active:scale-95 duration-100 duo-button border-4 ${
-                        isCompleted 
-                          ? "bg-emerald-500 text-white border-emerald-600 hover:bg-emerald-600"
-                          : isFirstUncompleted
-                            ? "bg-primary text-white border-primary-foreground/20 hover:scale-105"
-                            : "bg-muted text-muted-foreground border-card-border/60 cursor-not-allowed"
-                      }`}
+                  return (
+                    <div 
+                      key={lesson.id} 
+                      className={`relative z-10 my-6 flex flex-col items-center ${offsetClasses[idx % 5]}`}
                     >
-                      {isCompleted ? <Check className="w-4 h-4" /> : idx + 1}
+                      <button
+                        disabled={isLocked}
+                        onClick={() => handleSelectLesson(lesson.id)}
+                        className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm shadow-md transition-all active:scale-95 duration-100 duo-button border-4 ${
+                          isCompleted 
+                            ? "bg-emerald-500 text-white border-emerald-600 hover:bg-emerald-600"
+                            : isFirstUncompleted
+                              ? "bg-primary text-white border-primary-foreground/20 hover:scale-105"
+                              : "bg-muted text-muted-foreground border-card-border/60 cursor-not-allowed"
+                        }`}
+                      >
+                        {isCompleted ? <Check className="w-4 h-4" /> : idx + 1}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6 flex-1 flex flex-col justify-start">
+              <div>
+                <span className="text-[10px] font-bold text-primary uppercase">Experimental Sandbox</span>
+                <h3 className="font-extrabold text-sm mb-2">🧪 AI Discovery Lab Workspace</h3>
+                <p className="text-[10px] text-muted-foreground leading-normal">
+                  Explore and create interactive podcasts, generate high-definition educational diagrams, roleplay with historical figures, or chat with speaking documents.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 overflow-y-auto max-h-[480px] pr-1">
+                
+                {/* 1. Podcast Generator */}
+                <div className="p-4 bg-muted border border-card-border rounded-2xl space-y-3 flex flex-col justify-between text-left">
+                  <div className="space-y-1.5">
+                    <span className="text-[9px] font-black text-primary uppercase block">🎙️ AI Podcast Generator</span>
+                    <input 
+                      type="text"
+                      placeholder="e.g. Chemical bonding in non-metals"
+                      value={podcastTopic}
+                      onChange={(e) => setPodcastTopic(e.target.value)}
+                      className="w-full p-2 bg-card border border-card-border rounded-xl text-xs focus:outline-none"
+                    />
+                    <select
+                      value={podcastLang}
+                      onChange={(e) => setPodcastLang(e.target.value)}
+                      className="w-full p-1.5 bg-card border border-card-border rounded-xl text-[10px] font-bold"
+                    >
+                      <option value="English">English Voice</option>
+                      <option value="Hindi">Hindi Voice (हिंदी)</option>
+                    </select>
+                  </div>
+                  
+                  {podcastScript && (
+                    <div className="p-2 bg-card border border-card-border/60 rounded-xl text-[10px] text-muted-foreground space-y-1 max-h-[80px] overflow-y-auto italic">
+                      {podcastScript.slice(0, 2).map((l, i) => (
+                        <p key={i}><strong>{l.speaker}:</strong> {l.text}</p>
+                      ))}
+                      <p className="text-[9px] text-primary">... [Script generated]</p>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={generatePodcast}
+                      disabled={podcastGenerating}
+                      className="flex-1 py-1.5 bg-primary text-white font-bold rounded-lg text-[10px] cursor-pointer hover:brightness-110 disabled:opacity-50"
+                    >
+                      {podcastGenerating ? "Generating..." : "Generate Show"}
+                    </button>
+                    {podcastScript && (
+                      <button
+                        onClick={playPodcastAudio}
+                        className={`px-3 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer text-white transition-all ${
+                          podcastPlaying ? "bg-rose-500 animate-pulse" : "bg-secondary hover:brightness-110"
+                        }`}
+                      >
+                        {podcastPlaying ? "⏹ Stop" : "🔊 Listen"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* 2. Image Generator */}
+                <div className="p-4 bg-muted border border-card-border rounded-2xl space-y-3 flex flex-col justify-between text-left">
+                  <div className="space-y-1.5">
+                    <span className="text-[9px] font-black text-secondary uppercase block">🎨 Educational Illustration</span>
+                    <input 
+                      type="text"
+                      placeholder="e.g. Chloroplast structure diagram"
+                      value={imgPrompt}
+                      onChange={(e) => setImgPrompt(e.target.value)}
+                      className="w-full p-2 bg-card border border-card-border rounded-xl text-xs focus:outline-none"
+                    />
+                  </div>
+
+                  {generatedImgUrl && (
+                    <div className="w-full aspect-video bg-card rounded-xl border border-card-border overflow-hidden relative flex items-center justify-center">
+                      <img src={generatedImgUrl} alt="AI Generated" className="object-cover w-full h-full" />
+                      <span className="absolute bottom-1 right-1 bg-black/60 text-[8px] text-white px-1.5 py-0.5 rounded font-mono">Generated Concept</span>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={generateIllustration}
+                    disabled={imgGenerating}
+                    className="w-full py-1.5 bg-secondary text-white font-bold rounded-lg text-[10px] cursor-pointer hover:brightness-110 disabled:opacity-50"
+                  >
+                    {imgGenerating ? "Drawing Illustration..." : "Generate Diagram"}
+                  </button>
+                </div>
+
+                {/* 3. Character Chat Roleplay */}
+                <div className="p-4 bg-muted border border-card-border rounded-2xl space-y-3 text-left">
+                  <div className="flex justify-between items-center pb-2 border-b border-card-border/60">
+                    <span className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase">🎭 Character Chat Roleplay</span>
+                    <select
+                      value={charSelect}
+                      onChange={(e) => {
+                        setCharSelect(e.target.value);
+                        setCharLog([{ sender: "char", text: `Hello! I am ${e.target.value === "Einstein" ? "Albert Einstein" : e.target.value === "Curie" ? "Marie Curie" : e.target.value === "Newton" ? "Isaac Newton" : "Aryabhata"}. Ask me anything about my theories and formulas!` }]);
+                      }}
+                      className="bg-card border border-card-border p-1 rounded text-[10px] font-bold"
+                    >
+                      <option value="Einstein">Albert Einstein</option>
+                      <option value="Curie">Marie Curie</option>
+                      <option value="Newton">Isaac Newton</option>
+                      <option value="Aryabhata">Aryabhata</option>
+                    </select>
+                  </div>
+
+                  <div className="h-[120px] bg-card border border-card-border rounded-xl p-3 overflow-y-auto text-[10px] space-y-2 flex flex-col">
+                    {charLog.map((m, idx) => (
+                      <div key={idx} className={`p-2 rounded-xl max-w-[85%] leading-normal ${m.sender === "user" ? "bg-primary/10 border border-primary/20 self-end text-right" : "bg-muted border border-card-border/60 self-start"}`}>
+                        <strong className="block text-[8px] opacity-75 uppercase mb-0.5">{m.sender === "user" ? "You" : charSelect}</strong>
+                        {m.text}
+                      </div>
+                    ))}
+                    {charTyping && (
+                      <span className="text-[9px] text-muted-foreground animate-pulse">Thinking in character...</span>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <input 
+                      type="text"
+                      placeholder={`Ask ${charSelect} a scientific doubt...`}
+                      value={charInput}
+                      onChange={(e) => setCharInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && sendCharacterMessage()}
+                      className="flex-1 p-2 bg-card border border-card-border rounded-xl text-xs focus:outline-none"
+                    />
+                    <button
+                      onClick={sendCharacterMessage}
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-[10px] cursor-pointer"
+                    >
+                      Ask
                     </button>
                   </div>
-                );
-              })}
+                </div>
+
+                {/* 4. talking Document Reader */}
+                <div className="p-4 bg-muted border border-card-border rounded-2xl space-y-3 text-left">
+                  <div className="flex justify-between items-center pb-2 border-b border-card-border/60">
+                    <span className="text-[9px] font-black text-rose-600 dark:text-rose-400 uppercase">📁 talking Document Reader (RAG + Audio)</span>
+                    <select
+                      value={docFile || ""}
+                      onChange={(e) => {
+                        setDocFile(e.target.value || null);
+                        setDocChatLog([]);
+                      }}
+                      className="bg-card border border-card-border p-1 rounded text-[10px] font-bold"
+                    >
+                      <option value="">Select Document</option>
+                      <option value="Science_Chapter_2.pdf">Science_Chapter_2.pdf</option>
+                      <option value="Physics_Lab_Notes.pdf">Physics_Lab_Notes.pdf</option>
+                      <option value="CBSE_Syllabus_Class_10.pdf">CBSE_Class_10.pdf</option>
+                    </select>
+                  </div>
+
+                  <div className="h-[120px] bg-card border border-card-border rounded-xl p-3 overflow-y-auto text-[10px] space-y-2 flex flex-col">
+                    {!docFile ? (
+                      <div className="flex-1 flex items-center justify-center italic text-muted-foreground text-[10px]">
+                        Please select a document above to begin chatting.
+                      </div>
+                    ) : (
+                      <>
+                        <div className="p-2 bg-muted border border-card-border/60 rounded-xl self-start">
+                          <span className="text-[8px] opacity-75 block font-bold text-rose-500 uppercase">Document</span>
+                          Loaded document: <strong>{docFile}</strong>. Ask me any question, and I will search inside the pages and speak the answers back to you!
+                        </div>
+                        {docChatLog.map((m, idx) => (
+                          <div key={idx} className={`p-2 rounded-xl max-w-[85%] leading-normal ${m.sender === "user" ? "bg-primary/10 border border-primary/20 self-end text-right" : "bg-rose-500/10 border border-rose-500/20 self-start"}`}>
+                            <strong className="block text-[8px] opacity-75 uppercase mb-0.5">{m.sender === "user" ? "You" : "Document Voice"}</strong>
+                            {m.text}
+                          </div>
+                        ))}
+                      </>
+                    )}
+                    {docTalking && (
+                      <span className="text-[9px] text-rose-500 animate-pulse font-bold flex items-center gap-1">
+                        🔊 Document is speaking answer aloud...
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <input 
+                      disabled={!docFile}
+                      type="text"
+                      placeholder="Ask the document something..."
+                      value={docInput}
+                      onChange={(e) => setDocInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && sendDocQuestion()}
+                      className="flex-1 p-2 bg-card border border-card-border rounded-xl text-xs focus:outline-none disabled:opacity-50"
+                    />
+                    <button
+                      disabled={!docFile}
+                      onClick={sendDocQuestion}
+                      className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-[10px] cursor-pointer disabled:opacity-50"
+                    >
+                      Ask
+                    </button>
+                  </div>
+                </div>
+
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Right Column: AI Lesson Drawer Panel */}
