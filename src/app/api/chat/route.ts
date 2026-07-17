@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Call Google Gemini API endpoint directly
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     const promptContext = `You are a friendly, highly intelligent school teacher. Explain the following student doubt in a very simple, clear, and easy-to-understand way.
 Explain it in the language the student used (primarily ${language || "English"}).
