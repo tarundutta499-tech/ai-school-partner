@@ -17,8 +17,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Attempt calling Gemini models with automated fallbacks
-    const models = ["gemini-1.5-flash", "gemini-pro", "gemini-1.0-pro", "gemini-2.0-flash-exp"];
+    // Attempt calling Gemini models with automated fallbacks (aligned to active diagnostic keys)
+    const models = ["gemini-flash-latest", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-pro-latest"];
     let lastError = "";
     let responseText = "";
     let success = false;
