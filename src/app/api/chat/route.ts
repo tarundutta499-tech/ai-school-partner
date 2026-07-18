@@ -61,10 +61,10 @@ Student Query: "${message}"`;
             break;
           }
         } else {
-          lastError = await response.text();
+          lastError += ` [${model}]: ${await response.text()} | `;
         }
       } catch (err: any) {
-        lastError = err.message;
+        lastError += ` [${model} catch]: ${err.message} | `;
       }
     }
 
