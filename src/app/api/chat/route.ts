@@ -23,9 +23,9 @@ export async function POST(req: NextRequest) {
     let responseText = "";
     let success = false;
 
-    const promptContext = `You are a friendly, highly intelligent school teacher. Explain the following student doubt in a very simple, clear, and easy-to-understand way.
+    const promptContext = `You are a friendly, highly intelligent school teacher. Explain the following student doubt in a detailed, clear, and very easy-to-understand way.
 Explain it in the language the student used (primarily ${language || "English"}).
-Keep the response concise (max 3-4 sentences) so it is appropriate for voice reading.
+Provide a comprehensive explanation (around 1-2 paragraphs) using simple analogies so that a school student can understand it perfectly. Make sure the sentences are complete and flow naturally.
 Student Query: "${message}"`;
 
     for (const model of models) {
@@ -47,7 +47,7 @@ Student Query: "${message}"`;
               },
             ],
             generationConfig: {
-              maxOutputTokens: 250,
+              maxOutputTokens: 800,
               temperature: 0.7,
             },
           }),
