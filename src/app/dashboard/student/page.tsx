@@ -639,298 +639,78 @@ export default function StudentDashboard() {
             </div>
           </div>
 
-          {/* Section 15: Future Modules Preview */}
-          <div className="bg-card border border-card-border p-6 rounded-3xl shadow-sm space-y-3">
-            <h3 className="font-extrabold text-xs text-muted-foreground uppercase tracking-wider block">Platform Beta (Upcoming)</h3>
-            <div className="space-y-2 text-[10px] text-muted-foreground leading-normal">
-              <p>🚀 <strong>AR Science Experiments:</strong> Interactive 3D chloroplast thylakoid models launching in August.</p>
-              <p>🏆 <strong>Olympiad & JEE/NEET Prep:</strong> CBSE Board foundation reference papers.</p>
-              <p>✍ <strong>AI Essay Evaluator:</strong> Draft grading metrics.</p>
-            </div>
+          {/* AI Discovery Lab Launcher Card */}
+          <div className="bg-gradient-to-br from-indigo-900 to-indigo-955 border-2 border-indigo-500/30 p-6 rounded-3xl shadow-xl space-y-3 text-left">
+            <span className="text-[9px] font-black text-indigo-300 uppercase tracking-widest block">Interactive Laboratory</span>
+            <h3 className="font-extrabold text-sm text-white">🧪 AI Discovery Lab</h3>
+            <p className="text-[10px] text-indigo-200/80 leading-relaxed">
+              Explore conversational video podcasts with Rohan & Dr. Sen, draw high-definition diagrams, roleplay with Einstein, or chat with textbook documents!
+            </p>
+            <Link 
+              href="/dashboard/student/discovery-lab"
+              className="w-full text-center py-2.5 bg-white text-indigo-900 font-bold rounded-xl text-xs hover:bg-neutral-100 transition-all cursor-pointer block"
+            >
+              Launch Discovery Lab →
+            </Link>
           </div>
         </div>
 
-        {/* Center Column: Study Map OR AI Discovery Lab */}
+        {/* Center Column: Study Map */}
         <div className="bg-card border border-card-border rounded-3xl p-6 shadow-sm relative overflow-hidden flex flex-col justify-between col-span-1">
-          {/* Main workspace selector header */}
-          <div className="flex bg-muted p-1 rounded-xl border border-card-border mb-6">
-            <button
-              onClick={() => setCenterMode("map")}
-              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                centerMode === "map" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              🗺️ Learning Map
-            </button>
-            <button
-              onClick={() => setCenterMode("discovery")}
-              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                centerMode === "discovery" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              🧪 AI Discovery Lab
-            </button>
-          </div>
-
-          {centerMode === "map" ? (
-            <div>
-              <div className="flex items-center justify-between pb-4 border-b border-card-border/80 mb-6">
-                <div>
-                  <span className="text-[9px] font-bold text-primary uppercase">Active Chapter</span>
-                  <h3 className="font-extrabold text-sm">Photosynthesis: Lesson roadmap</h3>
-                </div>
-                <button 
-                  onClick={() => handleSelectLesson("1")}
-                  className="px-3 py-1.5 rounded-xl bg-primary text-white text-[10px] font-bold flex items-center gap-1 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
-                >
-                  <BrainCircuit className="w-3.5 h-3.5" /> Continue Learning
-                </button>
-              </div>
-
-              {/* Curriculum Roadmap Journey nodes */}
-              <div className="relative py-8 flex flex-col items-center">
-                <div className="absolute top-0 bottom-0 w-1 timeline-line rounded-full z-0"></div>
-
-                {lessons.map((lesson, idx) => {
-                  const isCompleted = lesson.completed;
-                  const isFirstUncompleted = !isCompleted && (idx === 0 || lessons[idx - 1].completed);
-                  const isLocked = !isCompleted && !isFirstUncompleted;
-
-                  const offsetClasses = [
-                    "translate-x-0",
-                    "translate-x-12",
-                    "translate-x-0",
-                    "-translate-x-12",
-                    "translate-x-0"
-                  ];
-
-                  return (
-                    <div 
-                      key={lesson.id} 
-                      className={`relative z-10 my-6 flex flex-col items-center ${offsetClasses[idx % 5]}`}
-                    >
-                      <button
-                        disabled={isLocked}
-                        onClick={() => handleSelectLesson(lesson.id)}
-                        className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm shadow-md transition-all active:scale-95 duration-100 duo-button border-4 ${
-                          isCompleted 
-                            ? "bg-emerald-500 text-white border-emerald-600 hover:bg-emerald-600"
-                            : isFirstUncompleted
-                              ? "bg-primary text-white border-primary-foreground/20 hover:scale-105"
-                              : "bg-muted text-muted-foreground border-card-border/60 cursor-not-allowed"
-                        }`}
-                      >
-                        {isCompleted ? <Check className="w-4 h-4" /> : idx + 1}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-6 flex-1 flex flex-col justify-start">
+          <div>
+            <div className="flex items-center justify-between pb-4 border-b border-card-border/80 mb-6">
               <div>
-                <span className="text-[10px] font-bold text-primary uppercase">Experimental Sandbox</span>
-                <h3 className="font-extrabold text-sm mb-2">🧪 AI Discovery Lab Workspace</h3>
-                <p className="text-[10px] text-muted-foreground leading-normal">
-                  Explore and create interactive podcasts, generate high-definition educational diagrams, roleplay with historical figures, or chat with speaking documents.
-                </p>
+                <span className="text-[9px] font-bold text-primary uppercase">Active Chapter</span>
+                <h3 className="font-extrabold text-sm">Photosynthesis: Lesson roadmap</h3>
               </div>
-
-              <div className="grid grid-cols-1 gap-4 overflow-y-auto max-h-[480px] pr-1">
-                
-                {/* 1. Podcast Generator */}
-                <div className="p-4 bg-muted border border-card-border rounded-2xl space-y-3 flex flex-col justify-between text-left">
-                  <div className="space-y-1.5">
-                    <span className="text-[9px] font-black text-primary uppercase block">🎙️ AI Podcast Generator</span>
-                    <input 
-                      type="text"
-                      placeholder="e.g. Chemical bonding in non-metals"
-                      value={podcastTopic}
-                      onChange={(e) => setPodcastTopic(e.target.value)}
-                      className="w-full p-2 bg-card border border-card-border rounded-xl text-xs focus:outline-none"
-                    />
-                    <select
-                      value={podcastLang}
-                      onChange={(e) => setPodcastLang(e.target.value)}
-                      className="w-full p-1.5 bg-card border border-card-border rounded-xl text-[10px] font-bold"
-                    >
-                      <option value="English">English Voice</option>
-                      <option value="Hindi">Hindi Voice (हिंदी)</option>
-                    </select>
-                  </div>
-                  
-                  {podcastScript && (
-                    <div className="p-2 bg-card border border-card-border/60 rounded-xl text-[10px] text-muted-foreground space-y-1 max-h-[80px] overflow-y-auto italic">
-                      {podcastScript.slice(0, 2).map((l, i) => (
-                        <p key={i}><strong>{l.speaker}:</strong> {l.text}</p>
-                      ))}
-                      <p className="text-[9px] text-primary">... [Script generated]</p>
-                    </div>
-                  )}
-
-                  <div className="flex gap-2">
-                    <button
-                      onClick={generatePodcast}
-                      disabled={podcastGenerating}
-                      className="flex-1 py-1.5 bg-primary text-white font-bold rounded-lg text-[10px] cursor-pointer hover:brightness-110 disabled:opacity-50"
-                    >
-                      {podcastGenerating ? "Generating..." : "Generate Show"}
-                    </button>
-                    {podcastScript && (
-                      <button
-                        onClick={playPodcastAudio}
-                        className={`px-3 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer text-white transition-all ${
-                          podcastPlaying ? "bg-rose-500 animate-pulse" : "bg-secondary hover:brightness-110"
-                        }`}
-                      >
-                        {podcastPlaying ? "⏹ Stop" : "🔊 Listen"}
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* 2. Image Generator */}
-                <div className="p-4 bg-muted border border-card-border rounded-2xl space-y-3 flex flex-col justify-between text-left">
-                  <div className="space-y-1.5">
-                    <span className="text-[9px] font-black text-secondary uppercase block">🎨 Educational Illustration</span>
-                    <input 
-                      type="text"
-                      placeholder="e.g. Chloroplast structure diagram"
-                      value={imgPrompt}
-                      onChange={(e) => setImgPrompt(e.target.value)}
-                      className="w-full p-2 bg-card border border-card-border rounded-xl text-xs focus:outline-none"
-                    />
-                  </div>
-
-                  {generatedImgUrl && (
-                    <div className="w-full aspect-video bg-card rounded-xl border border-card-border overflow-hidden relative flex items-center justify-center">
-                      <img src={generatedImgUrl} alt="AI Generated" className="object-cover w-full h-full" />
-                      <span className="absolute bottom-1 right-1 bg-black/60 text-[8px] text-white px-1.5 py-0.5 rounded font-mono">Generated Concept</span>
-                    </div>
-                  )}
-
-                  <button
-                    onClick={generateIllustration}
-                    disabled={imgGenerating}
-                    className="w-full py-1.5 bg-secondary text-white font-bold rounded-lg text-[10px] cursor-pointer hover:brightness-110 disabled:opacity-50"
-                  >
-                    {imgGenerating ? "Drawing Illustration..." : "Generate Diagram"}
-                  </button>
-                </div>
-
-                {/* 3. Character Chat Roleplay */}
-                <div className="p-4 bg-muted border border-card-border rounded-2xl space-y-3 text-left">
-                  <div className="flex justify-between items-center pb-2 border-b border-card-border/60">
-                    <span className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase">🎭 Character Chat Roleplay</span>
-                    <select
-                      value={charSelect}
-                      onChange={(e) => {
-                        setCharSelect(e.target.value);
-                        setCharLog([{ sender: "char", text: `Hello! I am ${e.target.value === "Einstein" ? "Albert Einstein" : e.target.value === "Curie" ? "Marie Curie" : e.target.value === "Newton" ? "Isaac Newton" : "Aryabhata"}. Ask me anything about my theories and formulas!` }]);
-                      }}
-                      className="bg-card border border-card-border p-1 rounded text-[10px] font-bold"
-                    >
-                      <option value="Einstein">Albert Einstein</option>
-                      <option value="Curie">Marie Curie</option>
-                      <option value="Newton">Isaac Newton</option>
-                      <option value="Aryabhata">Aryabhata</option>
-                    </select>
-                  </div>
-
-                  <div className="h-[120px] bg-card border border-card-border rounded-xl p-3 overflow-y-auto text-[10px] space-y-2 flex flex-col">
-                    {charLog.map((m, idx) => (
-                      <div key={idx} className={`p-2 rounded-xl max-w-[85%] leading-normal ${m.sender === "user" ? "bg-primary/10 border border-primary/20 self-end text-right" : "bg-muted border border-card-border/60 self-start"}`}>
-                        <strong className="block text-[8px] opacity-75 uppercase mb-0.5">{m.sender === "user" ? "You" : charSelect}</strong>
-                        {m.text}
-                      </div>
-                    ))}
-                    {charTyping && (
-                      <span className="text-[9px] text-muted-foreground animate-pulse">Thinking in character...</span>
-                    )}
-                  </div>
-
-                  <div className="flex gap-2">
-                    <input 
-                      type="text"
-                      placeholder={`Ask ${charSelect} a scientific doubt...`}
-                      value={charInput}
-                      onChange={(e) => setCharInput(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && sendCharacterMessage()}
-                      className="flex-1 p-2 bg-card border border-card-border rounded-xl text-xs focus:outline-none"
-                    />
-                    <button
-                      onClick={sendCharacterMessage}
-                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-[10px] cursor-pointer"
-                    >
-                      Ask
-                    </button>
-                  </div>
-                </div>
-
-                {/* 4. Interactive Document Chat */}
-                <div className="p-4 bg-muted border border-card-border rounded-2xl space-y-3 text-left">
-                  <div className="flex justify-between items-center pb-2 border-b border-card-border/60">
-                    <span className="text-[9px] font-black text-rose-600 dark:text-rose-400 uppercase">📁 Interactive Document Chat (RAG)</span>
-                    <select
-                      value={docFile || ""}
-                      onChange={(e) => {
-                        setDocFile(e.target.value || null);
-                        setDocChatLog([]);
-                      }}
-                      className="bg-card border border-card-border p-1 rounded text-[10px] font-bold"
-                    >
-                      <option value="">Select Document</option>
-                      <option value="Science_Chapter_2.pdf">Science_Chapter_2.pdf</option>
-                      <option value="Physics_Lab_Notes.pdf">Physics_Lab_Notes.pdf</option>
-                      <option value="CBSE_Syllabus_Class_10.pdf">CBSE_Class_10.pdf</option>
-                    </select>
-                  </div>
-
-                  <div className="h-[120px] bg-card border border-card-border rounded-xl p-3 overflow-y-auto text-[10px] space-y-2 flex flex-col">
-                    {!docFile ? (
-                      <div className="flex-1 flex items-center justify-center italic text-muted-foreground text-[10px]">
-                        Please select a document above to begin chatting.
-                      </div>
-                    ) : (
-                      <>
-                        <div className="p-2 bg-muted border border-card-border/60 rounded-xl self-start">
-                          <span className="text-[8px] opacity-75 block font-bold text-rose-500 uppercase">Document</span>
-                          I am the document <strong>{docFile}</strong>. Ask me any question, and I will explain and answer you strictly using my page contents!
-                        </div>
-                        {docChatLog.map((m, idx) => (
-                          <div key={idx} className={`p-2 rounded-xl max-w-[85%] leading-normal ${m.sender === "user" ? "bg-primary/10 border border-primary/20 self-end text-right" : "bg-rose-500/10 border border-rose-500/20 self-start"}`}>
-                            <strong className="block text-[8px] opacity-75 uppercase mb-0.5">{m.sender === "user" ? "You" : docFile}</strong>
-                            {m.text}
-                          </div>
-                        ))}
-                      </>
-                    )}
-                  </div>
-
-                  <div className="flex gap-2">
-                    <input 
-                      disabled={!docFile}
-                      type="text"
-                      placeholder="Ask the document something..."
-                      value={docInput}
-                      onChange={(e) => setDocInput(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && sendDocQuestion()}
-                      className="flex-1 p-2 bg-card border border-card-border rounded-xl text-xs focus:outline-none disabled:opacity-50"
-                    />
-                    <button
-                      disabled={!docFile}
-                      onClick={sendDocQuestion}
-                      className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-[10px] cursor-pointer disabled:opacity-50"
-                    >
-                      Ask
-                    </button>
-                  </div>
-                </div>
-
-              </div>
+              <button 
+                onClick={() => handleSelectLesson("1")}
+                className="px-3 py-1.5 rounded-xl bg-primary text-white text-[10px] font-bold flex items-center gap-1 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+              >
+                <BrainCircuit className="w-3.5 h-3.5" /> Continue Learning
+              </button>
             </div>
-          )}
+
+            {/* Curriculum Roadmap Journey nodes */}
+            <div className="relative py-8 flex flex-col items-center">
+              <div className="absolute top-0 bottom-0 w-1 timeline-line rounded-full z-0"></div>
+
+              {lessons.map((lesson, idx) => {
+                const isCompleted = lesson.completed;
+                const isFirstUncompleted = !isCompleted && (idx === 0 || lessons[idx - 1].completed);
+                const isLocked = !isCompleted && !isFirstUncompleted;
+
+                const offsetClasses = [
+                  "translate-x-0",
+                  "translate-x-12",
+                  "translate-x-0",
+                  "-translate-x-12",
+                  "translate-x-0"
+                ];
+
+                return (
+                  <div 
+                    key={lesson.id} 
+                    className={`relative z-10 my-6 flex flex-col items-center ${offsetClasses[idx % 5]}`}
+                  >
+                    <button
+                      disabled={isLocked}
+                      onClick={() => handleSelectLesson(lesson.id)}
+                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm shadow-md transition-all active:scale-95 duration-100 duo-button border-4 ${
+                        isCompleted 
+                          ? "bg-emerald-500 text-white border-emerald-600 hover:bg-emerald-600"
+                          : isFirstUncompleted
+                            ? "bg-primary text-white border-primary-foreground/20 hover:scale-105"
+                            : "bg-muted text-muted-foreground border-card-border/60 cursor-not-allowed"
+                      }`}
+                    >
+                      {isCompleted ? <Check className="w-4 h-4" /> : idx + 1}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         {/* Right Column: AI Lesson Drawer Panel */}
