@@ -47,7 +47,7 @@ Student Query: "${message}"`;
               },
             ],
             generationConfig: {
-              maxOutputTokens: 800,
+              maxOutputTokens: 4000,
               temperature: 0.7,
             },
           }),
